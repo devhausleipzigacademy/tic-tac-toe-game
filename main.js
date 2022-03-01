@@ -66,7 +66,7 @@ resetButton.addEventListener('click', () => {
     generateGridCells()
     markers = {};
     frozen = false;
-    messages.innerHTML = "<h4>Tic-Tac-Toe is easy, they said. You'll dominate, they said.</h4>"
+    messages.innerHTML = "<h4>Tic-Tac-Toe is easy, they said. It'll be no sweat, they said.</h4>"
 })
 
 function appendX(element) {
@@ -160,7 +160,29 @@ function forDiaAdj([row, column]){
     return filterInvalid(adjacents)
 }
 
-const adjacencyFunctions = [horAdj, vertAdj, backDiaAdj, forDiaAdj]
+const adjFuncMap = {
+    "option-adjacency-hor": horAdj,
+    "option-adjacency-vert": vertAdj,
+    "option-adjacency-backdia": backDiaAdj,
+    "option-adjacency-fordia": forDiaAdj
+}
+
+const adjModeElementMap = {
+    "linear": adjacencyLinearBlock,
+    "non-linear": adjacencyNonLinearBlock
+}
+
+function computeActiveAdjFuncs(){
+    const activeAdjFuncs = [];
+    const adjFuncBools = adjModeElementMap[adjacencySelect.value].querySelectorAll('div')
+
+    for(const adjFuncBool of adjFuncBools){
+        if(adjFuncBool.querySelector('input').checked){
+            activeAdjFuncs.push( adjFuncMap[adjFuncBool.id] )
+        }
+    }
+    return activeAdjFuncs;
+}
 
 function recursiveCheck(player, coordinate, adjacencyFunction, winLength, currentLength = 1, memo = null){
 
@@ -188,7 +210,7 @@ function recursiveCheck(player, coordinate, adjacencyFunction, winLength, curren
 
     for(const adjacent of adjacents){
         if(winFlag){
-            return winFlag; // shortcut looping through adjacents if win already found
+            return winFlag; // shortcircuit looping through adjacents if win already found
         }
 
         let [row, column] = adjacent;
@@ -206,14 +228,28 @@ function recursiveCheck(player, coordinate, adjacencyFunction, winLength, curren
 }
 
 function checkTicTacToe(player, coordinate, winLength = optionsWinLength.value){
+    const activeAdjFuncs = computeActiveAdjFuncs();
 
-    for(const adjacencyFunction of adjacencyFunctions){
-        if( recursiveCheck(player, coordinate, adjacencyFunction, winLength) ){
-            return true;
+    if( adjacencySelect.value == "linear"){
+        for(const adjacencyFunction of activeAdjFuncs){
+            if( recursiveCheck(player, coordinate, adjacencyFunction, winLength) ){
+                return true;
+            }
         }
-    }
+        return false;
+    } else {
+        const compositeAdjacencyFunction = function(coordinate) {
+            const adjacents = [];
 
-    return false;
+            for(const adjFunc of activeAdjFuncs){
+                adjacents.push(adjFunc(coordinate))
+            }
+            
+            return adjacents.flat()
+        }
+
+        return recursiveCheck(player, coordinate, compositeAdjacencyFunction, winLength)
+    }
 }
 
 gameGrid.addEventListener("click", (event) => {
