@@ -60,7 +60,7 @@ const players = {
 
 let currentPlayer = players.x
 
-const markers = []
+const markers = {}
 
 messages.innerHTML = "<h4>Click a cell to start playing</h3>"
 
@@ -69,26 +69,121 @@ messages.innerHTML = "<h4>Click a cell to start playing</h3>"
 ///////////////////////////
 
 function checkIfMarked(element) {
-    return markers.some( (coordinate) => { return coordinate == element.id } )
+    return Object.values(markers).some( (obj) => { return obj.coordinate == element.id } )
 }
+
+function whichPlayer(coordinate) {
+    const marker = markers[coordinate];
+    return marker.player
+}
+
+function getAdjacents([row, column]){
+    row = Number(row)
+    column = Number(column)
+    
+    const left = [row, column - 1];
+    const right = [row, column + 1];
+    const above = [row + 1, column];
+    const below = [row - 1, column];
+    const topleft = [row + 1, column - 1];
+    const topright = [row + 1, column + 1];
+    const bottomleft = [row - 1, column - 1];
+    const bottomright = [row - 1, column + 1];
+
+    const adjacents = [left, right, above, below, topleft, topright, bottomleft, bottomright]
+    .filter(
+        (coordinate) => { 
+            return !coordinate.some(
+                (component) => {
+                    return component < 0 || component > 2
+            }
+        ) }
+    );
+
+    return adjacents
+}
+
+function checkTicTacToe(player, coordinate, winLength = 3, currentLength = 0, memo = new Set()){
+
+    console.log('checktictactoe called')
+    parsedCoordinate = coordinate.replace('xy_', '').split('-')
+    console.log(parsedCoordinate)
+
+    const adjacents = getAdjacents(parsedCoordinate).filter( 
+        (adjacent) => {
+            const [row, column] = adjacent;
+            return !(memo.has(`xy_${row}-${column}`)) //keep if adjacent is not in memo
+        }
+    )
+    console.log(adjacents)
+    console.log(memo)
+    
+    for(const adjacent of adjacents){
+        const [row, column] = adjacent;
+        memo.add(`xy_${row}-${column}`)
+
+        if ( checkIfMarked(adjacent) ){
+            if (whichPlayer(adjacent) == player){
+
+                if( currentLength + 1 == winLength){
+                    return true
+                } else {
+                    return checkTicTacToe(player, adjacent, winLength, currentLength + 1, memo);
+                }
+
+            }
+        }
+    
+    }
+
+    // if no winning chain found, return false
+    return false;
+}
+
 
 gameGrid.addEventListener("click", (event) => {
     if( event.target.matches('.game-grid > .grid-square') ) {
+
         if( checkIfMarked(event.target) ) {
             console.log('already marked')
             return;
         }
+
+        const coordinate = event.target.id;
+
         switch( currentPlayer ){
             case players.x:
-                markers.push(event.target.id)
+                markers[coordinate] = {
+                    "coordinate": coordinate,
+                    "player": players.x
+                }
                 appendX(event.target)
+
+                if( checkTicTacToe(players.x, coordinate) ){
+                    console.log('Player X won!')
+                }
+
+                // switch players
                 currentPlayer = players.o
                 break;
             case players.o:
-                markers.push(event.target.id)
+                markers[coordinate] = {
+                    "coordinate": coordinate,
+                    "player": players.o
+                }
                 appendO(event.target)
+
+                if( checkTicTacToe(players.o, coordinate) ){
+                    console.log('Player O won!')
+                }
+
+                // switch players
                 currentPlayer = players.x
                 break;
         }
+
+        // check if game is won/lost
+
+
     }
 })
