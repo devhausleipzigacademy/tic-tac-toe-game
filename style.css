@@ -33,6 +33,10 @@
     display: block;
 }
 
+#messages > h3 {
+    color: red;
+}
+
 .x-marker {
     position: absolute;
     top: 18%;

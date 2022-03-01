@@ -62,37 +62,36 @@ let currentPlayer = players.x
 
 const markers = {}
 
+let frozen = false;
+
 messages.innerHTML = "<h4>Click a cell to start playing</h3>"
 
 ///////////////////////////
 //// State Transitions ////
 ///////////////////////////
 
-function checkIfMarked(element) {
-    return Object.values(markers).some( (obj) => { return obj.coordinate == element.id } )
+function checkIfMarked(id) {
+    return Object.values(markers).some( (obj) => { return obj.id == id } )
 }
 
-function whichPlayer(coordinate) {
-    const marker = markers[coordinate];
+function whichPlayer(id) {
+    const marker = markers[id];
     return marker.player
 }
 
-function getAdjacents([row, column]){
-    row = Number(row)
-    column = Number(column)
-    
+function getAdjacents([row, column]){   
     const left = [row, column - 1];
     const right = [row, column + 1];
-    const above = [row + 1, column];
-    const below = [row - 1, column];
-    const topleft = [row + 1, column - 1];
-    const topright = [row + 1, column + 1];
-    const bottomleft = [row - 1, column - 1];
-    const bottomright = [row - 1, column + 1];
+    const above = [row - 1, column];
+    const below = [row + 1, column];
+    const topleft = [row - 1, column - 1];
+    const topright = [row - 1, column + 1];
+    const bottomleft = [row + 1, column - 1];
+    const bottomright = [row + 1, column + 1];
 
     const adjacents = [left, right, above, below, topleft, topright, bottomleft, bottomright]
     .filter(
-        (coordinate) => { 
+        (coordinate) => {
             return !coordinate.some(
                 (component) => {
                     return component < 0 || component > 2
@@ -103,78 +102,83 @@ function getAdjacents([row, column]){
     return adjacents
 }
 
-function checkTicTacToe(player, coordinate, winLength = 3, currentLength = 0, memo = new Set()){
+function checkTicTacToe(player, coordinate, winLength = 3, currentLength = 1, memo = null){
 
-    console.log('checktictactoe called')
-    parsedCoordinate = coordinate.replace('xy_', '').split('-')
-    console.log(parsedCoordinate)
-
-    const adjacents = getAdjacents(parsedCoordinate).filter( 
-        (adjacent) => {
-            const [row, column] = adjacent;
-            return !(memo.has(`xy_${row}-${column}`)) //keep if adjacent is not in memo
-        }
-    )
-    console.log(adjacents)
-    console.log(memo)
-    
-    for(const adjacent of adjacents){
-        const [row, column] = adjacent;
-        memo.add(`xy_${row}-${column}`)
-
-        if ( checkIfMarked(adjacent) ){
-            if (whichPlayer(adjacent) == player){
-
-                if( currentLength + 1 == winLength){
-                    return true
-                } else {
-                    return checkTicTacToe(player, adjacent, winLength, currentLength + 1, memo);
-                }
-
-            }
-        }
-    
+    if( currentLength == winLength ) {
+        return true;
     }
 
-    // if no winning chain found, return false
-    return false;
+    if(memo === null){
+        memo = new Set()
+    }
+
+    let [row, column] = coordinate;
+    let id = `xy_${row}-${column}`
+    memo.add(id)
+
+    const adjacents = getAdjacents(coordinate).filter( 
+        (adjacent) => {
+            let [row, column] = adjacent;
+            let id = `xy_${row}-${column}`
+            return !(memo.has(id)) //keep if adjacent is not in memo
+        }
+    )
+
+    let winFlag = false;
+
+    for(const adjacent of adjacents){
+        let [row, column] = adjacent;
+        let id = `xy_${row}-${column}`
+
+        if ( checkIfMarked(id) ){
+            memo.add(id)
+            if (whichPlayer(id) == player){
+                winFlag = checkTicTacToe(player, adjacent, winLength, currentLength + 1, memo);
+            }
+        }
+    }
+
+    return winFlag;
 }
 
 
 gameGrid.addEventListener("click", (event) => {
-    if( event.target.matches('.game-grid > .grid-square') ) {
+    if( event.target.matches('.game-grid > .grid-square') && !frozen ) {
 
-        if( checkIfMarked(event.target) ) {
+        if( checkIfMarked(event.target.id) ) {
             console.log('already marked')
             return;
         }
 
-        const coordinate = event.target.id;
+        const id = event.target.id;
+        let coordinate;
 
         switch( currentPlayer ){
             case players.x:
-                markers[coordinate] = {
-                    "coordinate": coordinate,
+                markers[id] = {
+                    "id": id,
                     "player": players.x
                 }
                 appendX(event.target)
-
+                coordinate = id.replace('xy_', '').split('-').map( (elem) => Number(elem) )
                 if( checkTicTacToe(players.x, coordinate) ){
-                    console.log('Player X won!')
+                    frozen = true;
+                    messages.innerHTML = '<h3>Player X won!</h3>'
                 }
 
                 // switch players
                 currentPlayer = players.o
                 break;
             case players.o:
-                markers[coordinate] = {
-                    "coordinate": coordinate,
+                markers[id] = {
+                    "id": id,
                     "player": players.o
                 }
                 appendO(event.target)
-
+                coordinate = id.replace('xy_', '').split('-').map( (elem) => Number(elem) )
                 if( checkTicTacToe(players.o, coordinate) ){
-                    console.log('Player O won!')
+                    frozen = true;
+                    messages.innerHTML = '<h3>Player O won!</h3>'
                 }
 
                 // switch players
