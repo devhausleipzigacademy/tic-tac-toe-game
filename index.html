@@ -4,26 +4,101 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic-Tac-Toe</title>
+    <title>Devine Tic-Tac-Toe</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
     
-    <div class="title">
-        <h2>Tic-Tac-Toe Evolved</h2>
-    </div>
-
+    <h2 class="text-center">Devine Tic-Tac-Toe</h2>
+    <div class="text-center" id="messages"></div>
     <div id="grid-wrapper">
         <div class="game-grid"></div>
-        <div id="buttons">
-            <button id="button-reset">Reset</button>
-            <button id="button-computer">Play Computer</button>
-        </div>
         <audio id="music" controls>
             <source src="./assets/audio/voices-from-heaven.ogg" type="audio/ogg">
             Your browser does not support the audio element.
         </audio>
-        <div id="messages">
+        <div id="buttons">
+            <button id="button-reset">Reset</button>
+            <button id="button-computer">Play Computer</button>
+        </div>
+    </div>
+
+    <div id="options">
+        <h4>Board Settings</h4>
+        <div id="board-settings">
+
+            <div id="options-player-name" class="inputs">
+                <label for="player-name">Player Name:</label>
+                <input type="text" name="player-name">
+            </div>
+
+            <div id="options-opponent-name" class="inputs">
+                <label for="opponent-name">Opponent Name:</label>
+                <input type="text" name="opponent-name">
+            </div>
+
+            <div id="options-grid-size" class="inputs">
+                <label for="grid-size">Grid Size:</label>
+                <input type="number" name="grid-size"  value="3" min="2">
+            </div>
+
+        </div>
+        <div id="win-conditions">
+            <h4>Win Conditions</h4>
+        
+            <div id="options-win-length">
+                <label for="win-length">Win Length:</label>
+                <input type="number" name="win-length"  value="3" min="3">
+            </div>
+
+            <div id="options-adjacency">
+                <label for="adjacency">Select Adjacency Mode:</label>
+                <select name="adjacency">
+                    <option value="linear">Linear</option>
+                    <option value="non-linear">Non-Linear</option>
+                </select>
+            </div>
+
+            <div id="linear-adjacency">
+                <h5>Linear Adjacency</h5>
+                <div>
+                    <input type="checkbox" id="option-adjacency-hor" name="option-adjacency-hor" checked>
+                    <label for="option-adjacency-hor">Horizontal Adjacency</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="option-adjacency-vert" name="option-adjacency-vert" checked>
+                    <label for="option-adjacency-vert">Vertical Adjacency</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="option-adjacency-backdia" name="option-adjacency-backdia" checked>
+                    <label for="option-adjacency-backdia">Backward Diagonal Adjacency</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="option-adjacency-fordia" name="option-adjacency-fordia" checked>
+                    <label for="option-adjacency-fordia">Forward Diagonal Adjacency</label>
+                </div>
+            </div>
+
+            <div id="non-linear-adjacency">
+                <h5>Non-Linear Adjacency</h5>
+                <div>
+                    <input type="checkbox" id="option-adjacency-hor" name="option-adjacency-hor" checked>
+                    <label for="option-adjacency-hor">Horizontal Adjacency</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="option-adjacency-vert" name="option-adjacency-vert" checked>
+                    <label for="option-adjacency-vert">Vertical Adjacency</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="option-adjacency-backdia" name="option-adjacency-backdia" checked>
+                    <label for="option-adjacency-backdia">Backward Diagonal Adjacency</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="option-adjacency-fordia" name="option-adjacency-fordia" checked>
+                    <label for="option-adjacency-fordia">Forward Diagonal Adjacency</label>
+                </div>
+            </div>
+
         </div>
     </div>
 

@@ -1,13 +1,88 @@
-///////////////
-//// Utils ////
-///////////////
+
+///////////////////////////////
+//// Initialize Game State ////
+///////////////////////////////
+
+const root = document.documentElement;
+const gameGrid = document.querySelector('.game-grid')
+const messages = document.querySelector('#messages')
+
+const players = {
+    "x": "X",
+    "o": "O"
+}
+
+let currentPlayer = players.x
+let markers = {}
+let frozen = false;
+
+messages.innerHTML = "<h4>Click a cell to start playing</h3>"
+
+document.querySelector("#music").loop = true;
+
+const adjacencySelect = document.querySelector('#options-adjacency > select')
+const adjacencyLinearBlock = document.querySelector('#linear-adjacency')
+const adjacencyNonLinearBlock = document.querySelector('#non-linear-adjacency')
+
+
+if(adjacencySelect.value == "linear"){
+    adjacencyNonLinearBlock.classList.toggle('hide')
+} else {
+    adjacencyLinearBlock.classList.toggle('hide')
+}
+
+adjacencySelect.addEventListener('input', (event) => {
+    adjacencyNonLinearBlock.classList.toggle('hide')
+    adjacencyLinearBlock.classList.toggle('hide')
+})
+
+const optionsGridSize = document.querySelector("#options-grid-size > input")
+const optionsWinLength = document.querySelector("#options-win-length > input")
+
+function generateGridCells() {
+    gameGrid.style.gridTemplateRows = `repeat(${optionsGridSize.value}, 1fr)`
+    gameGrid.style.gridTemplateColumns = `repeat(${optionsGridSize.value}, 1fr)`
+
+    for (let i = 0; i < optionsGridSize.value; i++) {
+        for (let j = 0; j < optionsGridSize.value; j++) {
+            const gridSquare = document.createElement('div');
+            gridSquare.id = `xy_${i}-${j}`
+            gridSquare.classList.add('grid-square')
+            gridSquare.style.width = `${600/optionsGridSize.value}px`
+            gridSquare.style.height = `${600/optionsGridSize.value}px`
+            gridSquare.style.border = `${2/(8* (optionsGridSize.value - 3) + 1)}px solid #D3219B`
+            
+            gameGrid.appendChild(gridSquare)
+        }
+    }
+}
+
+generateGridCells()
+
+const resetButton = document.querySelector('#button-reset');
+
+resetButton.addEventListener('click', () => {
+    removeChildren(gameGrid)
+    generateGridCells()
+    markers = {};
+    frozen = false;
+    messages.innerHTML = "<h4>Tic-Tac-Toe is easy, they said. You'll dominate, they said.</h4>"
+})
 
 function appendX(element) {
     const xLeft = document.createElement('div')
     const xRight = document.createElement('div')
+
+    const width = `${600/optionsGridSize.value - 520/optionsGridSize.value}px`
+    const height = `${600/optionsGridSize.value - 200/optionsGridSize.value}px`
     
     xLeft.classList.add('x-marker', 'x-left')
+    xLeft.style.width = width;
+    xLeft.style.height = height;
+
     xRight.classList.add('x-marker', 'x-right')
+    xRight.style.width = width;
+    xRight.style.height = height;
 
     element.appendChild(xLeft)
     element.appendChild(xRight)
@@ -18,7 +93,12 @@ function appendO(element) {
     const oOuter = document.createElement('div')
 
     oInner.classList.add('o-marker', 'o-inner')
+    oInner.style.width = `${600/optionsGridSize.value - 250/optionsGridSize.value}px`
+    oInner.style.height = `${600/optionsGridSize.value - 250/optionsGridSize.value}px`
+
     oOuter.classList.add('o-marker', 'o-outer')
+    oOuter.style.width = `${600/optionsGridSize.value - 150/optionsGridSize.value}px`
+    oOuter.style.height = `${600/optionsGridSize.value - 150/optionsGridSize.value}px`
 
     oOuter.appendChild(oInner)
     element.appendChild(oOuter)
@@ -29,44 +109,6 @@ function removeChildren(element) {
         element.removeChild(element.lastElementChild);
     }
 }
-
-///////////////////////
-//// Prepare Board ////
-///////////////////////
-
-document.querySelector("#music").loop = true;
-
-const gameGrid = document.querySelector('.game-grid')
-const messages = document.querySelector('#messages')
-
-const rows = 3;
-const columns = 3;
-
-for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < columns; j++) {
-        const gridSquare = document.createElement('div');
-        gridSquare.id = `xy_${i}-${j}`
-        gridSquare.classList.add('grid-square')
-        gameGrid.appendChild(gridSquare)
-    }
-}
-
-///////////////////////////////
-//// Initialize Game State ////
-///////////////////////////////
-
-const players = {
-    "x": "X",
-    "o": "O"
-}
-
-let currentPlayer = players.x
-
-const markers = {}
-
-let frozen = false;
-
-messages.innerHTML = "<h4>Click a cell to start playing</h3>"
 
 ///////////////////////////
 //// State Transitions ////
@@ -85,7 +127,7 @@ function filterInvalid(array) {
     return array.filter(
         (coordinate) => {
             const [row, column] = coordinate;
-            return  !(row < 0 || row > rows || column < 0 || column > columns)
+            return  !(row < 0 || row > optionsGridSize.value || column < 0 || column > optionsGridSize.value)
         }
     )
 }
@@ -111,7 +153,7 @@ function backDiaAdj([row, column]){
     return filterInvalid(adjacents)
 }
 
-function forDiaAdj([row, column]){   
+function forDiaAdj([row, column]){  
     const topright = [row - 1, column + 1];
     const bottomleft = [row + 1, column - 1];
     const adjacents = [topright, bottomleft]
@@ -120,7 +162,7 @@ function forDiaAdj([row, column]){
 
 const adjacencyFunctions = [horAdj, vertAdj, backDiaAdj, forDiaAdj]
 
-function recursiveCheck(player, coordinate, adjacencyFunction, winLength = 3, currentLength = 1, memo = null){
+function recursiveCheck(player, coordinate, adjacencyFunction, winLength, currentLength = 1, memo = null){
 
     if( currentLength == winLength ) {
         return true;
@@ -163,10 +205,10 @@ function recursiveCheck(player, coordinate, adjacencyFunction, winLength = 3, cu
     return winFlag;
 }
 
-function checkTicTacToe(player, coordinate){
+function checkTicTacToe(player, coordinate, winLength = optionsWinLength.value){
 
     for(const adjacencyFunction of adjacencyFunctions){
-        if( recursiveCheck(player, coordinate, adjacencyFunction) ){
+        if( recursiveCheck(player, coordinate, adjacencyFunction, winLength) ){
             return true;
         }
     }
