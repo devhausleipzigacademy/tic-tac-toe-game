@@ -37,7 +37,14 @@ adjacencySelect.addEventListener('input', (event) => {
 })
 
 const optionsGridSize = document.querySelector("#options-grid-size > input")
+optionsGridSize.addEventListener('input', (event) => {
+        optionsGridSize.value = Math.max(3, Math.min(100, optionsGridSize.value));
+})
+
 const optionsWinLength = document.querySelector("#options-win-length > input")
+optionsWinLength.addEventListener('input', (event) => {
+    optionsWinLength.value = Math.max(3, Math.min(100, optionsWinLength.value));
+})
 
 function generateGridCells() {
     gameGrid.style.gridTemplateRows = `repeat(${optionsGridSize.value}, 1fr)`
