@@ -24,7 +24,11 @@ function appendO(element) {
     element.appendChild(oOuter)
 }
 
-
+function removeChildren(element) {
+    while (element.lastElementChild) {
+        element.removeChild(element.lastElementChild);
+    }
+}
 
 ///////////////////////
 //// Prepare Board ////
@@ -45,22 +49,46 @@ for (let i = 0; i < rows; i++) {
     }
 }
 
-const test1 = document.querySelector('#xy_1-1')
-appendO(test1)
-
-const test2 = document.querySelector('#xy_0-0')
-appendX(test2)
-
-
-
 ///////////////////////////////
 //// Initialize Game State ////
 ///////////////////////////////
 
-// 
+const players = {
+    "x": "X",
+    "o": "O"
+}
 
+let currentPlayer = players.x
 
+const markers = []
+
+messages.innerHTML = "<h4>Click a cell to start playing</h3>"
 
 ///////////////////////////
 //// State Transitions ////
 ///////////////////////////
+
+function checkIfMarked(element) {
+    return markers.some( (coordinate) => { return coordinate == element.id } )
+}
+
+gameGrid.addEventListener("click", (event) => {
+    if( event.target.matches('.game-grid > .grid-square') ) {
+        if( checkIfMarked(event.target) ) {
+            console.log('already marked')
+            return;
+        }
+        switch( currentPlayer ){
+            case players.x:
+                markers.push(event.target.id)
+                appendX(event.target)
+                currentPlayer = players.o
+                break;
+            case players.o:
+                markers.push(event.target.id)
+                appendO(event.target)
+                currentPlayer = players.x
+                break;
+        }
+    }
+})
