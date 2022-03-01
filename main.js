@@ -118,7 +118,7 @@ function forDiaAdj([row, column]){
 
 const adjacencyFunctions = [horAdj, vertAdj, backDiaAdj, forDiaAdj]
 
-function checkTicTacToe(player, coordinate, winLength = 3, currentLength = 1, memo = null){
+function recursiveCheck(player, coordinate, adjacencyFunction, winLength = 3, currentLength = 1, memo = null){
 
     if( currentLength == winLength ) {
         return true;
@@ -134,40 +134,43 @@ function checkTicTacToe(player, coordinate, winLength = 3, currentLength = 1, me
     let id = `xy_${row}-${column}`
     memo.add(id)
 
-    for(const adjacencyFunction of adjacencyFunctions){
-        if(winFlag){
-            return winFlag; // shortcut looping through adjacencyFunctions if win already found
-        }
-
-        const adjacents = adjacencyFunction(coordinate).filter( 
-            (adjacent) => {
-                let [row, column] = adjacent;
-                let id = `xy_${row}-${column}`
-                return !(memo.has(id)) //keep if adjacent is not in memo
-            }
-        )
-
-        for(const adjacent of adjacents){
-            if(winFlag){
-                return winFlag; // shortcut looping through adjacents if win already found
-            }
-
+    const adjacents = adjacencyFunction(coordinate).filter( 
+        (adjacent) => {
             let [row, column] = adjacent;
             let id = `xy_${row}-${column}`
+            return !(memo.has(id)) //keep if adjacent is not in memo
+        }
+    )
 
-            if ( checkIfMarked(id) ){
-                memo.add(id)
-                if (whichPlayer(id) == player){
-                    winFlag = checkTicTacToe(player, adjacent, winLength, currentLength + 1, memo);
-                }
-            }
+    for(const adjacent of adjacents){
+        if(winFlag){
+            return winFlag; // shortcut looping through adjacents if win already found
         }
 
+        let [row, column] = adjacent;
+        let id = `xy_${row}-${column}`
+
+        if ( checkIfMarked(id) ){
+            memo.add(id)
+            if (whichPlayer(id) == player){
+                winFlag = winFlag || recursiveCheck(player, adjacent, adjacencyFunction, winLength, currentLength + 1, memo);
+            }
+        }
     }
 
     return winFlag;
 }
 
+function checkTicTacToe(player, coordinate){
+
+    for(const adjacencyFunction of adjacencyFunctions){
+        if( recursiveCheck(player, coordinate, adjacencyFunction) ){
+            return true;
+        }
+    }
+
+    return false;
+}
 
 gameGrid.addEventListener("click", (event) => {
     if( event.target.matches('.game-grid > .grid-square') && !frozen ) {
@@ -188,6 +191,7 @@ gameGrid.addEventListener("click", (event) => {
                 }
                 appendX(event.target)
                 coordinate = id.replace('xy_', '').split('-').map( (elem) => Number(elem) )
+                
                 if( checkTicTacToe(players.x, coordinate) ){
                     frozen = true;
                     messages.innerHTML = '<h3>Player X won!</h3>'
