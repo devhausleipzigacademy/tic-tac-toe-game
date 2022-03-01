@@ -20,7 +20,7 @@
     background-color: black;
     width: 150px;
     height: 150px;
-    border: 2px solid #D3219B;
+    border: 2.5px solid #D3219B;
 }
 
 #buttons > button {
@@ -35,6 +35,10 @@
 
 .title h2 {
     display: block;
+}
+
+#music {
+    margin: 1rem;
 }
 
 #messages > h3 {

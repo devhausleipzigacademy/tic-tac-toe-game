@@ -34,6 +34,8 @@ function removeChildren(element) {
 //// Prepare Board ////
 ///////////////////////
 
+document.querySelector("#music").loop = true;
+
 const gameGrid = document.querySelector('.game-grid')
 const messages = document.querySelector('#messages')
 
