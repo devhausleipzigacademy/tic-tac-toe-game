@@ -12,6 +12,7 @@
     grid-template-columns: repeat(3, 1fr);
     background-color: black;
     border: 4px solid #D3219B;
+    margin-bottom: 1rem;
 }
 
 .grid-square {
@@ -20,6 +21,9 @@
     width: 150px;
     height: 150px;
     border: 2px solid #D3219B;
+}
+
+#buttons > button {
 }
 
 .title {

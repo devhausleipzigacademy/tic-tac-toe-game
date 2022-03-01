@@ -79,28 +79,44 @@ function whichPlayer(id) {
     return marker.player
 }
 
-function getAdjacents([row, column]){   
+function filterInvalid(array) {
+    return array.filter(
+        (coordinate) => {
+            const [row, column] = coordinate;
+            return  !(row < 0 || row > rows || column < 0 || column > columns)
+        }
+    )
+}
+
+function horAdj([row, column]){   
     const left = [row, column - 1];
     const right = [row, column + 1];
+    const adjacents = [left, right]
+    return filterInvalid(adjacents)
+}
+
+function vertAdj([row, column]){   
     const above = [row - 1, column];
     const below = [row + 1, column];
+    const adjacents = [above, below]
+    return filterInvalid(adjacents)
+}
+
+function backDiaAdj([row, column]){   
     const topleft = [row - 1, column - 1];
+    const bottomright = [row + 1, column + 1];
+    const adjacents = [topleft, bottomright]
+    return filterInvalid(adjacents)
+}
+
+function forDiaAdj([row, column]){   
     const topright = [row - 1, column + 1];
     const bottomleft = [row + 1, column - 1];
-    const bottomright = [row + 1, column + 1];
-
-    const adjacents = [left, right, above, below, topleft, topright, bottomleft, bottomright]
-    .filter(
-        (coordinate) => {
-            return !coordinate.some(
-                (component) => {
-                    return component < 0 || component > 2
-            }
-        ) }
-    );
-
-    return adjacents
+    const adjacents = [topright, bottomleft]
+    return filterInvalid(adjacents)
 }
+
+const adjacencyFunctions = [horAdj, vertAdj, backDiaAdj, forDiaAdj]
 
 function checkTicTacToe(player, coordinate, winLength = 3, currentLength = 1, memo = null){
 
@@ -108,34 +124,45 @@ function checkTicTacToe(player, coordinate, winLength = 3, currentLength = 1, me
         return true;
     }
 
-    if(memo === null){
+    if(memo == null){
         memo = new Set()
     }
+
+    let winFlag = false;
 
     let [row, column] = coordinate;
     let id = `xy_${row}-${column}`
     memo.add(id)
 
-    const adjacents = getAdjacents(coordinate).filter( 
-        (adjacent) => {
+    for(const adjacencyFunction of adjacencyFunctions){
+        if(winFlag){
+            return winFlag; // shortcut looping through adjacencyFunctions if win already found
+        }
+
+        const adjacents = adjacencyFunction(coordinate).filter( 
+            (adjacent) => {
+                let [row, column] = adjacent;
+                let id = `xy_${row}-${column}`
+                return !(memo.has(id)) //keep if adjacent is not in memo
+            }
+        )
+
+        for(const adjacent of adjacents){
+            if(winFlag){
+                return winFlag; // shortcut looping through adjacents if win already found
+            }
+
             let [row, column] = adjacent;
             let id = `xy_${row}-${column}`
-            return !(memo.has(id)) //keep if adjacent is not in memo
-        }
-    )
 
-    let winFlag = false;
-
-    for(const adjacent of adjacents){
-        let [row, column] = adjacent;
-        let id = `xy_${row}-${column}`
-
-        if ( checkIfMarked(id) ){
-            memo.add(id)
-            if (whichPlayer(id) == player){
-                winFlag = checkTicTacToe(player, adjacent, winLength, currentLength + 1, memo);
+            if ( checkIfMarked(id) ){
+                memo.add(id)
+                if (whichPlayer(id) == player){
+                    winFlag = checkTicTacToe(player, adjacent, winLength, currentLength + 1, memo);
+                }
             }
         }
+
     }
 
     return winFlag;
@@ -185,9 +212,6 @@ gameGrid.addEventListener("click", (event) => {
                 currentPlayer = players.x
                 break;
         }
-
-        // check if game is won/lost
-
 
     }
 })
