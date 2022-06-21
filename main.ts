@@ -266,9 +266,14 @@ function computeActiveAdjFuncs() {
 	return activeAdjFuncs;
 }
 
-const threeByThree: Predicate<Coordinate> = function (coord) {
+const nByN: Predicate<Coordinate> = function (coord) {
 	const [column, row] = coord;
-	return !(row < 1 || row > 3 || column < 1 || column > 3);
+	return !(
+		row < 1 ||
+		row > Number(optionsGridSize.value) ||
+		column < 1 ||
+		column > Number(optionsGridSize.value)
+	);
 };
 
 const neverSeen = function (memo: SeenMemo): Predicate<Coordinate> {
@@ -304,10 +309,7 @@ function recursiveCheck(
 
 	const adjacents = adjacencyFunction(coordinate);
 	const newAdjacents = filterInvalid<Coordinate>(adjacents, neverSeen(memo));
-	const newValidAdjacents = filterInvalid<Coordinate>(
-		newAdjacents,
-		threeByThree
-	);
+	const newValidAdjacents = filterInvalid<Coordinate>(newAdjacents, nByN);
 
 	console.log(newValidAdjacents);
 
