@@ -1,5 +1,5 @@
 {
-	"name": "snake-game",
+	"name": "tic-tac-toe-game",
 	"source": "index.html",
 	"scripts": {
 		"dev": "vite --host localhost",
