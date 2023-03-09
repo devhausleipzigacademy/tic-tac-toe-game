@@ -1,6 +1,21 @@
 {
-  "dependencies": {
-    "@types/node": "^18.0.0",
-    "typescript": "^4.7.4"
-  }
+	"name": "snake-game",
+	"source": "index.html",
+	"scripts": {
+		"dev": "vite --host localhost",
+		"build": "vite build",
+		"preview": "vite preview --host localhost"
+	},
+	"dependencies": {
+		"lodash": "^4.17.21"
+	},
+	"devDependencies": {
+		"@tailwindcss/forms": "^0.5.2",
+		"@types/node": "^18.0.0",
+		"@types/lodash": "^4.14.184",
+		"postcss": "^8.4.16",
+		"tailwindcss": "^3.1.8",
+		"vite": "^3.0.9",
+		"typescript": "^4.8.2"
+	}
 }

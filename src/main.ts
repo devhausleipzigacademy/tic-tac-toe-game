@@ -1,57 +1,5 @@
-// types
-
-type Player = {
-	name: string;
-	mark: string;
-};
-
-type CellState = {
-	mark: string | null;
-};
-
-type GameState = Record<string, CellState>;
-
-type Coordinate = [number, number];
-
-type AdjFunc = (coord: Coordinate) => Array<Coordinate>;
-
-type Predicate<T> = (element: T) => boolean;
-
-type SeenMemo = Set<string>;
-
-// utilities
-
-function mod(n: number, m: number) {
-	return ((n % m) + m) % m;
-}
-
-function randomNumber(range: number) {
-	return Math.floor(Math.random() * range);
-}
-
-function randomCoordinate(xRange: number, yRange: number): Coordinate {
-	return [randomNumber(xRange), randomNumber(yRange)];
-}
-
-function removeChildren(element: Element) {
-	while (element.lastElementChild) {
-		element.removeChild(element.lastElementChild);
-	}
-}
-
-function coordToId([x, y]: Coordinate): string {
-	return `${x}-${y}`;
-}
-
-function idToCoord(id: string): Coordinate {
-	return id.split("-").map(Number) as Coordinate;
-}
-
-function filterInvalid<T>(array: Array<T>, predicate: Predicate<T>): Array<T> {
-	return array.filter((element) => {
-		return predicate(element);
-	});
-}
+import { AdjFunc, Coordinate, Predicate, SeenMemo } from "./types";
+import { coordToId, filterInvalid, idToCoord, removeChildren } from "./utils";
 
 ///////////////////////////////
 //// Initialize Game State ////
@@ -63,7 +11,7 @@ const messages = document.querySelector("#messages") as HTMLElement;
 
 const players: Record<string, string> = {
 	x: "X",
-	o: "O",
+	o: "O"
 };
 
 type Marker = {
@@ -131,7 +79,9 @@ function generateGridCells() {
 			gridSquare.id = `${i}-${j}`;
 			gridSquare.classList.add("grid-square");
 			gridSquare.style.width = `${600 / Number(optionsGridSize.value)}px`;
-			gridSquare.style.height = `${600 / Number(optionsGridSize.value)}px`;
+			gridSquare.style.height = `${
+				600 / Number(optionsGridSize.value)
+			}px`;
 			gridSquare.style.border = `${
 				2 / (8 * (Number(optionsGridSize.value) - 3) + 1)
 			}px solid #D3219B`;
@@ -159,10 +109,12 @@ function appendX(element: Element) {
 	const xRight = document.createElement("div");
 
 	const width = `${
-		600 / Number(optionsGridSize.value) - 520 / Number(optionsGridSize.value)
+		600 / Number(optionsGridSize.value) -
+		520 / Number(optionsGridSize.value)
 	}px`;
 	const height = `${
-		600 / Number(optionsGridSize.value) - 200 / Number(optionsGridSize.value)
+		600 / Number(optionsGridSize.value) -
+		200 / Number(optionsGridSize.value)
 	}px`;
 
 	xLeft.classList.add("x-marker", "x-left");
@@ -183,18 +135,22 @@ function appendO(element: Element) {
 
 	oInner.classList.add("o-marker", "o-inner");
 	oInner.style.width = `${
-		600 / Number(optionsGridSize.value) - 250 / Number(optionsGridSize.value)
+		600 / Number(optionsGridSize.value) -
+		250 / Number(optionsGridSize.value)
 	}px`;
 	oInner.style.height = `${
-		600 / Number(optionsGridSize.value) - 250 / Number(optionsGridSize.value)
+		600 / Number(optionsGridSize.value) -
+		250 / Number(optionsGridSize.value)
 	}px`;
 
 	oOuter.classList.add("o-marker", "o-outer");
 	oOuter.style.width = `${
-		600 / Number(optionsGridSize.value) - 150 / Number(optionsGridSize.value)
+		600 / Number(optionsGridSize.value) -
+		150 / Number(optionsGridSize.value)
 	}px`;
 	oOuter.style.height = `${
-		600 / Number(optionsGridSize.value) - 150 / Number(optionsGridSize.value)
+		600 / Number(optionsGridSize.value) -
+		150 / Number(optionsGridSize.value)
 	}px`;
 
 	oOuter.appendChild(oInner);
@@ -244,12 +200,12 @@ const adjFuncMap: Record<string, AdjFunc> = {
 	"option-adjacency-hor": horAdj,
 	"option-adjacency-vert": vertAdj,
 	"option-adjacency-backdia": backDiaAdj,
-	"option-adjacency-fordia": forDiaAdj,
+	"option-adjacency-fordia": forDiaAdj
 };
 
 const adjModeElementMap: Record<string, HTMLElement> = {
 	linear: adjacencyLinearBlock,
-	"non-linear": adjacencyNonLinearBlock,
+	"non-linear": adjacencyNonLinearBlock
 };
 
 function computeActiveAdjFuncs() {
@@ -350,7 +306,9 @@ function checkTicTacToe(
 
 	if (adjacencySelect.value == "linear") {
 		for (const adjacencyFunction of activeAdjFuncs) {
-			if (recursiveCheck(player, coordinate, adjacencyFunction, winLength)) {
+			if (
+				recursiveCheck(player, coordinate, adjacencyFunction, winLength)
+			) {
 				return true;
 			}
 		}
@@ -392,7 +350,7 @@ gameGrid.addEventListener("click", (event) => {
 			case players.x:
 				markers[id] = {
 					id: id,
-					player: players.x,
+					player: players.x
 				};
 				appendX(target);
 				coordinate = idToCoord(id);
@@ -408,7 +366,7 @@ gameGrid.addEventListener("click", (event) => {
 			case players.o:
 				markers[id] = {
 					id: id,
-					player: players.o,
+					player: players.o
 				};
 				appendO(target);
 				coordinate = idToCoord(id);
